@@ -2,12 +2,13 @@ from datetime import datetime
 from typing import List
 from uuid import UUID, uuid1
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 
 from places.destination import TourBasicInfo
+from background import audit_log_transaction
 
 router = APIRouter()
 
@@ -42,10 +43,41 @@ class Tourist(BaseModel):
 def signup(signup: Signup):
     try:
         userid = uuid1()
-        login = User(id=userid, username=signup.username, password=signup.password)
-        tourist = Tourist(id=userid, login=login, date_signed=datetime.now(), booked=0, tours=list())
+        login = User(id=userid, username=signup.username,
+                     password=signup.password)
+        tourist = Tourist(id=userid, login=login,
+                          date_signed=datetime.now(), booked=0, tours=list())
         tourist_json = jsonable_encoder(tourist)
         pending_users[userid] = tourist_json
         return JSONResponse(content=tourist_json, status_code=status.HTTP_201_CREATED)
     except:
         return JSONResponse(content={'message': 'invalid operation'}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.post('/ch02/user/login/')
+async def login(login: User, bg_task: BackgroundTasks):
+    try:
+        signup_json = jsonable_encoder(approved_users[login.id])
+        bg_task.add_task(audit_log_transaction,
+                         touristId=str(login.id), message='login')
+        return JSONResponse(content=signup_json, status_code=status.HTTP_200_OK)
+    except:
+        return JSONResponse(
+            content={'message': 'Invalid operation'},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.get('/ch02/user/login/{username}/{password}')
+async def login(username: str, password: str, bg_task: BackgroundTasks):
+    touirst_list = [tourist for tourist in approved_users.values()
+                    if tourist['login']['username'] == username and touirst_list['login']['password'] == password]
+    if len(touirst_list) == 0 or touirst_list == None:
+        return JSONResponse(
+            content={'message': 'invalid operation'},
+            status_code=status.HTTP_403_FORBIDDEN)
+    else:
+        touirst = touirst_list[0]
+        tour_json = jsonable_encoder(touirst)
+        bg_task.add_task(audit_log_transaction, touirstId=str(touirst['login']['id']), message='login')
+        return JSONResponse(content=tour_json, status_code=status.HTTP_200_OK)
+

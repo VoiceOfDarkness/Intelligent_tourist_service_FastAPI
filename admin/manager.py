@@ -4,8 +4,9 @@ from fastapi import APIRouter, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from places.destination import (Tour, TourBasicInfo, TourInput, TourLoaction,
-                                tours, tours_basic_info, tours_locations)
+from places.destination import (Tour, TourBasicInfo, TourInput, TourLocation,
+                                tours, tours_basic_info, tours_location)
+from login.user import approved_users, pending_users
 
 router = APIRouter()
 
@@ -22,7 +23,7 @@ def update_tour_destination(tour: Tour):
         tours[tid] = tour
         tours_basic_info = TourBasicInfo(
             id=tid, name=tour.name, type=tour.type, amenities=tour.amenities, ratings=tour.ratings)
-        tour_location = TourLoaction(
+        tour_location = TourLocation(
             id=tid, name=tour.name, city=tour.city, country=tour.country, location=tour.location)
         tours_basic_info[tid] = tours_basic_info
         tour_location[tid] = tour_location
@@ -48,7 +49,7 @@ def add_tour_destination(input: TourInput):
         tour_basic_info = TourBasicInfo(id=tid,
                                         name=input.name, type=input.type,
                                         amenities=input.amenities, ratings=0.0)
-        tour_location = TourLoaction(id=tid, name=input.name, city=input.city,
+        tour_location = TourLocation(id=tid, name=input.name, city=input.city,
                                      country=input.country, location=input.location)
         tours[tid] = tour
         tours_basic_info[tid] = tour_basic_info
