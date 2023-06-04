@@ -1,0 +1,54 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.env
+.env.*
+build/
+dist/
+eggs/
+*.egg-info/
+.wsgi/
+.hooks/
+.tox/
+.eggs/
+.cache/
+.idea/
+.vscode/
+
+# Local development
+db.sqlite3
+db.sqlite3-journal
+media/
+uploads/
+
+# Logs and backups
+*.log
+*.log.*
+*.swp
+*.swo
+*.bak
+*.backup
+
+# Editor and IDE files
+*~
+.vs/
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.ENV/
+
+# Dependency management
+pip-log.txt
+pip-delete-this-directory.txt
+requirements.txt
